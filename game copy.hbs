@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link href="/style.css" type="text/css" rel="stylesheet">
+    <title>websiteName</title>
+  </head>
+  <body>
+    <header><h1>{{titleName}}</h1></header>
+    {{> navbar}}
+    <p id='killCount'>Player kill-count:</p>
+    <p id='roundCounter'>This Round:</p>
+    <br>
+    <br>
+    <div id="gameMenu">
+      <h4 style="text-align:center">Controller and gamePlay<h4>
+        <ul>
+          <li>Use arrow keys to move up, down and side to side</li>
+          <li>Use space bar to shoot</li>
+          <li>kill as many enemies as possible without letting them pass you</li>
+          <li>The more enmies you kill the more enemies start to spawn</li>
+        </ul>
+        <button class="btn" id="gameBtn">Play now</button>
+    </div>
+
+    <div id="scoreMenu">
+      <h4 style="text-align:center">Your score:<span id="yourScore"></span><h4>
+    </div>
+
+    <script src="/script.js" type="text/javascript"></script>
+    <footer>
+      <p class="date">Created By - Dylan Kelly, CopyRight {{getDate}} </p>
+    </footer>
+  </body>
+</html>
