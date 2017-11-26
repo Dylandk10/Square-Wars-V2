@@ -8,6 +8,8 @@ boss = [];
 var gamePlaying;
 
 var startGame = () => {
+  document.getElementById("scores").style.display = "inline";
+  document.getElementById("scores").style.visibility = "visible";
   enemys = [];
   boss = [];
   gamePlaying = true;
@@ -37,6 +39,15 @@ var myGameArea = {
   //clear the canvas and update
   clear: function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  },
+  gameOver: function() {
+    this.canvas.style.display = "none";
+    this.canvas.style.visibility = "hidden";
+    document.getElementById("scores").style.display = "none";
+    document.getElementById("scores").style.visibility = "hidden";
+    document.getElementById("scoreMenu").style.display = "block";
+    document.getElementById("scoreMenu").style.visibility = "visible";
+    document.getElementById('yourScore').textContent = xxx.killCount;
   }
 }
 
@@ -96,6 +107,24 @@ class Npc {
     this.x += this.speedX;
   }
 }
+//boss class extends npc for faster class
+class Boss extends Npc {
+  constructor(name, hitPoints, width, height, x, y, color) {
+    super(hitPoints, width, height, x, y);
+      this.name = name;
+      this.speedX = 0;
+      this.color = "red";
+  }
+  update() {
+    let ctx = myGameArea.context;
+    ctx.fillStyle = "red";
+    ctx.fillRect(this.x, this.y, this.wdith, this.height);
+  }
+  newPos() {
+    this.x += this.speedX
+  }
+}
+
 
 class Bullet {
   constructor(width, height, x, y, color, bulletFire) {
@@ -155,7 +184,8 @@ var updateGameArea = () => {
   for(var i = 0; i < enemys.length; i++) {
     if(enemys[i].x < 0 && enemys[i].x != -5000) {
       gamePlaying = false;
-      document.getElementById('yourScore').textContent = xxx.killCount;
+      myGameArea.gameOver();
+
       scoreMenu();
     }
   }
@@ -206,9 +236,10 @@ var updateGameArea = () => {
   if(myGameArea.framNo === 1 || everyInterval(120 - xxx.roundCount)) {
     enemys.push(new Npc('Goblin', 50, 30, 30, 600, randomY, 'blue'));
     bullets.push(new Bullet(10, 5, -2, -2, 'black'));
-  }
-  if(round % 3 === 0) {
-    boss.push(new Npc('Boss', 100, 30, 30, 30, 600, randomY, 'red'));
+    if(round == 0) {
+      setInterval(spawnBoss(), 3000);
+    }
+
   }
 
   //loop threw enemys and update
@@ -228,19 +259,26 @@ var updateGameArea = () => {
     for(var j = 0; j < bullets.length; j++) {
     bullets[j].newPos();
     bullets[j].update();
-
+  }
     boss.forEach((el) => {
       el.x -= 1;
       el.newPos();
       el.update();
     });
-  }
+
 
   //show player killCount
   document.getElementById('killCount').textContent = `Player kill-count: ${xxx.killCount}`;
   document.getElementById('roundCounter').textContent = `This Round: ${round}`;
   }
 }
+//spawn npc function for boss
+var spawnBoss = () => {
+  var randomY = Math.floor(Math.random() * 240);
+  boss.push(new Boss('Boss', 50, 30, 30, 600, randomY, "red"));
+  console.log("pushed");
+}
+
 
 //Event listener for main menu...
 document.getElementById('gameBtn').addEventListener("click", () => {

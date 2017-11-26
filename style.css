@@ -1,0 +1,13 @@
+canvas {
+  border: 1px solid #eee;
+}
+
+#scores {
+  display: none;
+  visibility: hidden;
+}
+
+#scoreMenu {
+  display: none;
+  visibility: hidden;
+}
