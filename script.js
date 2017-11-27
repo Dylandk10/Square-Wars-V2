@@ -155,8 +155,8 @@ class Bullet {
 }
 
 //----------------------------------------------------------------------------------------------------
+//  GAME ENGINE CONSTANTLY RUNNING !!
 var readyFire = [];
-var deadEnemy = [];
 var round = 0;
 //game area always updating every 20min sec ...
 var updateGameArea = () => {
@@ -268,6 +268,7 @@ var updateGameArea = () => {
   document.getElementById('roundCounter').textContent = `This Round: ${round}`;
   }
 }
+//-----------------------------------------------------------------------------------------------------
 //spawn npc function for boss
 var spawnBoss = (count) => {
   console.log(count);
