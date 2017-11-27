@@ -108,16 +108,20 @@ class Npc {
   }
 }
 //boss class extends npc for faster class
-class Boss extends Npc {
+class Boss {
   constructor(name, hitPoints, width, height, x, y, color) {
-    super(hitPoints, width, height, x, y);
       this.name = name;
+      this.hitPoints = hitPoints;
+      this.wdith = width;
+      this.height = height;
+      this.x = x;
+      this.y = y;
       this.speedX = 0;
-      this.color = "red";
+      this.color = 'red';
   }
   update() {
     let ctx = myGameArea.context;
-    ctx.fillStyle = "red";
+    ctx.fillStyle = 'red';
     ctx.fillRect(this.x, this.y, this.wdith, this.height);
   }
   newPos() {
@@ -237,7 +241,12 @@ var updateGameArea = () => {
     enemys.push(new Npc('Goblin', 50, 30, 30, 600, randomY, 'blue'));
     bullets.push(new Bullet(10, 5, -2, -2, 'black'));
     if(round == 0) {
-      setInterval(spawnBoss(), 3000);
+      //turn killcount to string to send data to compare
+      let holdData = xxx.roundCount.toString();
+      holddata = holdData.split('');
+      holdData = holdData.slice(0, 1);
+      parseInt(holddata);
+      spawnBoss(holdData)
     }
 
   }
@@ -273,10 +282,15 @@ var updateGameArea = () => {
   }
 }
 //spawn npc function for boss
-var spawnBoss = () => {
+var spawnBoss = (count) => {
+  console.log(count);
   var randomY = Math.floor(Math.random() * 240);
-  boss.push(new Boss('Boss', 50, 30, 30, 600, randomY, "red"));
-  console.log("pushed");
+  if(count <= round) {
+    boss.push(new Boss('Boss', 50, 30, 30, 600 + 500, randomY, "red"));
+    count++;
+  } else {
+    console.log("no need for bosses");
+  }
 }
 
 
