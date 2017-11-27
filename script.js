@@ -96,39 +96,17 @@ class Npc {
     this.speedX = 0;
     this.x = x;
     this.y = y;
-    this.color = 'blue';
+    this.color = color;
   }
   update() {
     let ctx = myGameArea.context;
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.width, this.height);
   }
   newPos() {
     this.x += this.speedX;
   }
 }
-//boss class extends npc for faster class
-class Boss {
-  constructor(name, hitPoints, width, height, x, y, color) {
-      this.name = name;
-      this.hitPoints = hitPoints;
-      this.wdith = width;
-      this.height = height;
-      this.x = x;
-      this.y = y;
-      this.speedX = 0;
-      this.color = 'red';
-  }
-  update() {
-    let ctx = myGameArea.context;
-    ctx.fillStyle = 'red';
-    ctx.fillRect(this.x, this.y, this.wdith, this.height);
-  }
-  newPos() {
-    this.x += this.speedX
-  }
-}
-
 
 class Bullet {
   constructor(width, height, x, y, color, bulletFire) {
@@ -186,19 +164,19 @@ var updateGameArea = () => {
   if(gamePlaying) {
   //if enemys past width of gamefield stop
   for(var i = 0; i < enemys.length; i++) {
-    if(enemys[i].x < 0 && enemys[i].x != -5000) {
+    if(enemys[i].x < 0 && enemys[i].x != undefined && enemys[i].y != undefined) {
       gamePlaying = false;
       myGameArea.gameOver();
 
       scoreMenu();
     }
   }
-  //crash with handing...
+  //crash with handing... Npc
   for(var i = 0; i < enemys.length; i++) {
     for(var j = 0; j < bullets.length; j++) {
-    if(bullets[j].crashWith(enemys[i])) {
-      deadEnemy = enemys.slice(enemys[i], 1);
-      enemys[i].x = +50000;
+    if(bullets[j].crashWith(enemys[i]) && enemys[i].x != undefined && enemys[i].y != undefined) {
+      enemys[i].x = undefined;
+      enemys[i].y = undefined;
       enemys[i].update();
         if(xxx.roundCount >= 80) {
           //keep round count at 80 to many enemies spawn
@@ -212,6 +190,15 @@ var updateGameArea = () => {
         } else {
           round = round;
         }
+      }
+    }
+  }
+  //crash handling...Boss no points for bosses...
+  for(var i = 0; i < bullets.length; i++) {
+    for(var j = 0; j < boss.length; j++) {
+      if(bullets[i].crashWith(boss[j]) && boss[j].x != undefined && boss[j].y != undefined) {
+        boss[j].x = undefined;
+        boss[j].y = undefined;
       }
     }
   }
@@ -240,7 +227,7 @@ var updateGameArea = () => {
   if(myGameArea.framNo === 1 || everyInterval(120 - xxx.roundCount)) {
     enemys.push(new Npc('Goblin', 50, 30, 30, 600, randomY, 'blue'));
     bullets.push(new Bullet(10, 5, -2, -2, 'black'));
-    if(round == 0) {
+    if(round % 3 == 0 && round != 0) {
       //turn killcount to string to send data to compare
       let holdData = xxx.roundCount.toString();
       holddata = holdData.split('');
@@ -286,10 +273,9 @@ var spawnBoss = (count) => {
   console.log(count);
   var randomY = Math.floor(Math.random() * 240);
   if(count <= round) {
-    boss.push(new Boss('Boss', 50, 30, 30, 600 + 500, randomY, "red"));
+    //moved enmy back 500 thats why its 600 + 500 aka 11000
+    boss.push(new Npc('Boss', 50, 30, 30, 600 + 500, randomY, "green"));
     count++;
-  } else {
-    console.log("no need for bosses");
   }
 }
 
