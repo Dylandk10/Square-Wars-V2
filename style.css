@@ -1,5 +1,7 @@
 canvas {
-  border: 1px solid #eee;
+  border: 2px solid #000;
+  margin-left: 20%;
+  margin-right: 20%;
 }
 
 #scores {
@@ -10,4 +12,24 @@ canvas {
 #scoreMenu {
   display: none;
   visibility: hidden;
+}
+#gameMenu {
+  text-align: center;
+  border: 2px solid #ddd;
+  margin-left: 20%;
+  margin-right: 20%;
+  padding-bottom: 120px;
+}
+ol {
+  list-style-type: none;
+}
+
+#gameBtn {
+  padding: 20px;
+  background-color: #f00;
+  color: #fff;
+}
+#gameBtn:hover {
+  background-color: #330000;
+  cursor: pointer;
 }

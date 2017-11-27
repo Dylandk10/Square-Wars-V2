@@ -212,9 +212,11 @@ var updateGameArea = () => {
   for(var j = 0; j < bullets.length; j++) {
     //shoot function one at a time
     if(myGameArea.key && myGameArea.key === 32) {
-      readyFire = bullets.slice(bullets[j], 1);
-      readyFire[0].shoot()
+      readyFire.push(bullets[j]);
+      for(var k = 0; k < readyFire.length; k++) {
+      readyFire[k].shoot()
       }
+    }
   }
   if(myGameArea.key && myGameArea.key === 37) {xxx.speedX = - 3;}
   if(myGameArea.key && myGameArea.key === 39) {xxx.speedX =  3;}
