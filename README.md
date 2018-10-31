@@ -20,4 +20,5 @@ Blue Square = Basic enemy
 Green Square = Boss enemy
 
 
-Also note this is only the front-end of the game build, no mongodb or node, enjoy.
+Also note this is only the front-end build so some features are limited
+check out website-temp for backend features.
