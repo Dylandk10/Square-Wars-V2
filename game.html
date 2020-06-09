@@ -12,26 +12,35 @@
     </div>
     <br>
     <br>
-      <div id="gameMenu">
-        <h3 style="text-align:center">Controller and gamePlay</h3>
-        <ol>
-          <li>1. Use arrow keys to move up, down and side to side</li>
-          <li>2. Use space bar to shoot</li>
-          <li>3. kill as many enemies as possible without letting them pass you</li>
-          <li>4. The more enmies you kill the more enemies start to spawn</li>
-          <li>5. Red Square is Player(you), Blue is enemy, Green is enemy-Boss!</li>
-          <li>GOOD LUCK...</li>
-        </ol>
-        <button class="btn" id="gameBtn">Play now</button>
-      </div>
+	<div id="scores">
+		<p id='killCount'>Player kill-count:</p>
+		<p id='roundCounter'>This Round:</p>
+	</div>
+	<br>
+	<br>
+	<div id="gameMenu">
+		<h3 style="text-align:center">Rules and Instructions</h3>
+			<ol class="list">
+				<li>1. Use arrow keys to move up, down and side to side</li>
+				<li>2. Use space bar to shoot</li>
+				<li>3. kill as many enemies as possible without letting them pass you</li>
+				<li>4. The more enmies you kill the more enemies start to spawn</li>
+				<li>5. Red Square is Player(you), Blue is enemy, Green is enemy-Boss!</li>
+				<li>6. Killing a green square has a chance of dropping a bomb, if the player picks up the bomb all the spawned enemies die and the player gets all the points</li>
+				<br>
+				<li>GOOD LUCK...</li>
+				</ol>
+				<button class="btn" id="gameBtn">Play now</button>
+				<h3><span id="widthError"></span></h3>
+			</div>
 
-    <div id="scoreMenu">
-      <h1 style="text-align:center">Your score:<span id="yourScore"></span><h1>
-    </div>
+			<div id="scoreMenu">
+				<h1 style="text-align:center">Your score:<span id="yourScore"></span><h1>
+			</div>
 
-    <script src="script.js" type="text/javascript"></script>
     <footer>
       <p class="date">Created By --{K3LLY}--</p>
     </footer>
   </body>
+      <script src="script.js" type="text/javascript"></script>
 </html>

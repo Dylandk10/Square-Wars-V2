@@ -1,6 +1,4 @@
-//front build to square wars
-//declare player && enemys
-var xxx, enemy, enemys, bullet, bullets, boss;
+var xxx, enemy, enemys, bullet, bullets, boss, gameHandler;
 enemys = [];
 bullets = [];
 boss = [];
@@ -15,8 +13,7 @@ var startGame = () => {
   gamePlaying = true;
   myGameArea.start();
   xxx = new Player('xxx', 50, 30, 30, 50, 268, 'red');
-  //enemy = new Npc('goblin', 50, 30, 30, 60, 230, 'blue');
-  //bullet = new Bullet(10, 5, -2, -2, 'black');
+  gameHandler = new Game_Handler(0);
 }
 
 var myGameArea = {
@@ -25,16 +22,17 @@ var myGameArea = {
     this.canvas.width = 600;
     this.canvas.height = 320;
     this.context = this.canvas.getContext('2d');
-    document.body.insertBefore(this.canvas, document.body.childNodes[2]);
+    //document.body.insertBefore(this.canvas, document.body.childNodes[2]);
+	document.querySelector("main").appendChild(this.canvas);
     this.framNo = 0;
-    this.interval = setInterval(updateGameArea, 20);
+    this.interval = setInterval(updateGameArea, 15);
     //key down to go
     window.addEventListener("keyup", function(e) {
       myGameArea.key = false;
-    })
+    });
     window.addEventListener("keydown", function(e) {
       myGameArea.key = e.keyCode;
-    })
+    });
   },
   //clear the canvas and update
   clear: function() {
@@ -48,16 +46,24 @@ var myGameArea = {
     document.getElementById("scoreMenu").style.display = "block";
     document.getElementById("scoreMenu").style.visibility = "visible";
     document.getElementById('yourScore').textContent = xxx.killCount;
+  },
+  
+  everyInterval: function(n) {
+	if((myGameArea.framNo / n) % 1 === 0) {
+		return true;
+	}
+	return false;
+  },
+  
+  scoreMenu: function () {
+	myGameArea.canvas.display = "hidden";
+	document.getElementById('scoreMenu').style.display = 'hidden';
+	document.getElementById('gameMenu').style.display = "none";
   }
 }
 
-//function to calc framNo
-var everyInterval = (n) => {
-  if((myGameArea.framNo / n) % 1 === 0) {
-    return true;
-  }
-  return false;
-}
+
+
 //---------------------------------------------------------------------------------------------------------
 //player constructor killcount = player kills roundcount = rounds if round > 80 round = 80
 //bc enemys spawn to fast to kill. killCount will be sent to hight score
@@ -84,7 +90,26 @@ class Player {
     this.x += this.speedX;
     this.y += this.speedY;
   }
+  resetSpeed() {
+	xxx.speedX = 0;
+	xxx.speedY = 0;
+  }
+  //map clipping
+  checkPosition() {
+	  if(this.y <= 0) {
+		  this.y = 0;
+	  }
+	  if(this.y >= 293) {
+		  this.y = 293;
+	  }
+	  if(this.x <= 0) {
+		  this.x = 0;
+	  }
+  }
 }
+
+
+
 
 //npc/ enemy constructor
 class Npc {
@@ -108,6 +133,142 @@ class Npc {
   }
 }
 
+
+
+
+
+//game handlers handles all game related specs such as bullet and enemy collision, spawning enemies controlling round counter 
+class Game_Handler {
+	constructor(round) {
+		this.round = round;
+	}
+	checkWin() {
+		//if enemys past width of gamefield stop
+		for(var i = 0; i < enemys.length; i++) {
+			if(enemys[i].x < 0 && enemys[i].x != undefined && enemys[i].y != undefined) {
+				gamePlaying = false;
+				myGameArea.gameOver();
+
+				myGameArea.scoreMenu();
+			}
+		}
+	}
+	checkCrashHandle() {
+		//crash with handing... Npc
+		for(var i = 0; i < enemys.length; i++) {
+			for(var j = 0; j < bullets.length; j++) {
+				if(bullets[j].crashWith(enemys[i]) && enemys[i].x != undefined && enemys[i].y != undefined) {
+					enemys[i].x = undefined;
+					enemys[i].y = undefined;
+					enemys[i].update();
+					enemys.slice(enemys.indexOf(enemys[i], 1));
+					bullets.splice(bullets.indexOf(bullets[j], bullets.length));
+					this.roundHandler();
+					xxx.killCount += 1;
+					
+				}	
+			}
+		}
+	}
+	
+	//sub routine for ceckCrashHandle funciton 
+	roundHandler() {
+		if(xxx.roundCount < 80) {
+			xxx.roundCount += 1;
+		}
+		
+		if(xxx.killCount % 10 === 0) {
+			this.round += 1;
+		}
+	}
+	
+	
+	checkCrashHandleBoss() {
+		//crash handling...Boss no points for bosses...
+		for(var i = 0; i < bullets.length; i++) {
+			for(var j = 0; j < boss.length; j++) {
+				if(bullets[i].crashWith(boss[j]) && boss[j].x != undefined && boss[j].y != undefined) {
+					boss[j].x = undefined;
+					boss[j].y = undefined;
+					boss.slice(boss.indexOf(boss[j], 1));
+				}
+			}
+		}
+	}
+	
+	spawnBullet() {
+		var bullet = new Bullet(10, 5, -2, -2, 'black');
+		bullet.shoot();
+		bullets.push(bullet);
+	}
+	
+	spawnEnemies() {
+		//random y generator
+		var randomY = Math.floor(Math.random() * 240);
+		//spawn enemies
+		if(myGameArea.framNo === 1 || myGameArea.everyInterval(120 - xxx.roundCount)) {
+			enemys.push(new Npc('Enemy', 50, 30, 30, 600, randomY, 'blue'));
+			//bullets.push(new Bullet(10, 5, -2, -2, 'black'));
+			if(this.round % 3 == 0 && this.round != 0) {
+				//turn killcount to string to send data to compare
+				let holdData = xxx.roundCount.toString();
+				holdData = holdData.split('');
+				holdData = holdData.slice(0, 1);
+				parseInt(holdData);
+				this.spawnBoss(holdData)
+			}
+
+		}
+	}
+	
+	updateEnemies() {
+		//loop threw enemys and update
+		for(var i = 0; i < enemys.length; i++) {
+			//if player has killCount of 100 enemys move faster
+			if(xxx.killCount >= 100) {
+				enemys[i].x -= 1.25;
+			} else {
+				enemys[i].x -= 1;
+			}
+			enemys[i].update();
+		}
+	}
+	
+	updateBullets() {
+		//update bullet
+		for(var j = 0; j < bullets.length; j++) {
+			if(bullets[j].x > 600 ) {
+				bullets.slice(bullets.indexOf(bullets[j], bullets.length));
+			}
+			bullets[j].newPos();
+			bullets[j].update();
+		}
+	}
+	
+	updateBoss() {
+		boss.forEach((el) => {
+			el.x -= 1;
+			el.newPos();
+			el.update();
+		});
+	}
+	
+	spawnBoss(count) {
+		console.log(count);
+		var randomY = Math.floor(Math.random() * 240);
+		if(count <= this.round) {
+			//moved enmy back 500 thats why its 600 + 500 aka 11000
+			boss.push(new Npc('Boss', 50, 30, 30, 600 + 500, randomY, "green"));
+			count++;
+		}
+	}
+	
+	getRound() {
+		return this.round;
+	}
+}
+
+//bullet class
 class Bullet {
   constructor(width, height, x, y, color, bulletFire) {
     this.width = width;
@@ -156,148 +317,53 @@ class Bullet {
 
 //----------------------------------------------------------------------------------------------------
 //  GAME ENGINE CONSTANTLY RUNNING !!
-var readyFire = [];
-var round = 0;
-//game area always updating every 20min sec ...
+
+//game area always updating every 15mill sec ...
 var updateGameArea = () => {
   //if gamePlaying = true
   if(gamePlaying) {
-  //if enemys past width of gamefield stop
-  for(var i = 0; i < enemys.length; i++) {
-    if(enemys[i].x < 0 && enemys[i].x != undefined && enemys[i].y != undefined) {
-      gamePlaying = false;
-      myGameArea.gameOver();
+	gameHandler.checkWin();
+	gameHandler.checkCrashHandle();
+	gameHandler.checkCrashHandleBoss();
+	myGameArea.clear();
+	//must declare player speed
+	xxx.resetSpeed();
+  
+	if(myGameArea.key && myGameArea.key === 37) {xxx.speedX = - 5;}
+	if(myGameArea.key && myGameArea.key === 39) {xxx.speedX =  5;}
+	if(myGameArea.key && myGameArea.key === 38) {xxx.speedY = - 5;}
+	if(myGameArea.key && myGameArea.key === 40) {xxx.speedY =  5;}
+	if(myGameArea.key && myGameArea.key === 32) {gameHandler.spawnBullet();}
 
-      scoreMenu();
-    }
-  }
-  //crash with handing... Npc
-  for(var i = 0; i < enemys.length; i++) {
-    for(var j = 0; j < bullets.length; j++) {
-    if(bullets[j].crashWith(enemys[i]) && enemys[i].x != undefined && enemys[i].y != undefined) {
-      enemys[i].x = undefined;
-      enemys[i].y = undefined;
-      enemys[i].update();
-        if(xxx.roundCount >= 80) {
-          //keep round count at 80 to many enemies spawn
-          xxx.roundCount = 80;
-        } else {
-          xxx.roundCount += 1;
-        }
-        xxx.killCount += 1;
-        if(xxx.killCount % 10 === 0) {
-          round += 1
-        } else {
-          round = round;
-        }
-      }
-    }
-  }
-  //crash handling...Boss no points for bosses...
-  for(var i = 0; i < bullets.length; i++) {
-    for(var j = 0; j < boss.length; j++) {
-      if(bullets[i].crashWith(boss[j]) && boss[j].x != undefined && boss[j].y != undefined) {
-        boss[j].x = undefined;
-        boss[j].y = undefined;
-      }
-    }
-  }
-  //random y generator
-  var randomY = Math.floor(Math.random() * 240);
-  myGameArea.clear();
-  //must declare player speed
-  xxx.speedX = 0;
-  xxx.speedY = 0;
-  //game keys to move and shoot
-  for(var j = 0; j < bullets.length; j++) {
-    //shoot function one at a time
-    if(myGameArea.key && myGameArea.key === 32) {
-      readyFire.push(bullets[j]);
-      for(var k = 0; k < readyFire.length; k++) {
-      readyFire[k].shoot()
-      }
-    }
-  }
-  if(myGameArea.key && myGameArea.key === 37) {xxx.speedX = - 3;}
-  if(myGameArea.key && myGameArea.key === 39) {xxx.speedX =  3;}
-  if(myGameArea.key && myGameArea.key === 38) {xxx.speedY = - 3;}
-  if(myGameArea.key && myGameArea.key === 40) {xxx.speedY =  3}
-
-  //add a gameframe
-  myGameArea.framNo += 1;
-  //spawn enemies
-  if(myGameArea.framNo === 1 || everyInterval(120 - xxx.roundCount)) {
-    enemys.push(new Npc('Goblin', 50, 30, 30, 600, randomY, 'blue'));
-    bullets.push(new Bullet(10, 5, -2, -2, 'black'));
-    if(round % 3 == 0 && round != 0) {
-      //turn killcount to string to send data to compare
-      let holdData = xxx.roundCount.toString();
-      holddata = holdData.split('');
-      holdData = holdData.slice(0, 1);
-      parseInt(holddata);
-      spawnBoss(holdData)
-    }
-
-  }
-
-  //loop threw enemys and update
-  for(var i = 0; i < enemys.length; i++) {
-    //if player has killCount of 100 enemys move faster
-    if(xxx.killCount >= 100) {
-      enemys[i].x -= 1.25;
-    } else {
-      enemys[i].x -= 1;
-    }
-    enemys[i].update();
-  }
+	gameHandler.spawnEnemies();
+	gameHandler.updateEnemies();
     //update player
+	xxx.checkPosition();
     xxx.newPos();
     xxx.update();
-    //update bullet
-    for(var j = 0; j < bullets.length; j++) {
-    bullets[j].newPos();
-    bullets[j].update();
-  }
-    boss.forEach((el) => {
-      el.x -= 1;
-      el.newPos();
-      el.update();
-    });
-
-
-  //show player killCount
-  document.getElementById('killCount').textContent = `Player kill-count: ${xxx.killCount}`;
-  document.getElementById('roundCounter').textContent = `This Round: ${round}`;
+    gameHandler.updateBullets();
+	gameHandler.updateBoss();
+	//show player killCount
+	document.getElementById('killCount').textContent = `Player kill-count: ${xxx.killCount}`;
+	document.getElementById('roundCounter').textContent = `This Round: ${gameHandler.getRound()}`;
+	
+	//add a gameframe if the shoot key is enabled then disable the shoot key
+	myGameArea.framNo += 1;
+	if(myGameArea.key == 32)
+		myGameArea.key = null;
   }
 }
 //-----------------------------------------------------------------------------------------------------
-//spawn npc function for boss
-var spawnBoss = (count) => {
-  console.log(count);
-  var randomY = Math.floor(Math.random() * 240);
-  if(count <= round) {
-    //moved enmy back 500 thats why its 600 + 500 aka 11000
-    boss.push(new Npc('Boss', 50, 30, 30, 600 + 500, randomY, "green"));
-    count++;
-  }
-}
 
-
-//Event listener for main menu...
+//Event listener for main menu
 document.getElementById('gameBtn').addEventListener("click", () => {
-  document.getElementById('gameMenu').style.display = 'none';
-  startGame();
+	if(window.innerWidth < 700) {
+		document.getElementById("widthError").textContent = "Browser window must at least 700px long to play, Mobile does not Work";
+	} else {
+		document.getElementById('gameMenu').style.display = 'none';
+		startGame();
+	}
 });
-// document.getElementById('playAgain').addEventListener("click", () => {
-//   startGame();
-// });
-
-//score menu
-var scoreMenu = () => {
-  myGameArea.canvas.display = "hidden";
-  document.getElementById('scoreMenu').style.display = 'hidden';
-  document.getElementById('gameMenu').style.display = "none";
-};
 
 
 
